@@ -1,0 +1,53 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Monitor</title>
+    <script src="https://cdn.jsdelivr.net/npm/htmx.org@1.7.0/dist/htmx.js"></script>
+</head>
+<body>
+    <h1>Server Monitor</h1>
+    
+    <form hx-post="/add" hx-target="#serverList" hx-swap="innerHTML">
+        <label for="ipInput">Add IP:</label>
+        <input type="text" id="ipInput" name="ip" required>
+        <button type="submit">Add</button>
+    </form>
+
+    <div id="serverList">
+        <!-- Display the server list in a table -->
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Server</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range $server, $isActive := .Servers}}
+                    <tr>
+                        <td>{{$server}}</td>
+                        <td>{{if $isActive}}Active{{else}}Inactive{{end}}</td>
+                    </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+
+    <div id="serverStatus"></div>
+
+    <script>
+        function updateServerStatus() {
+            htmx.ajax('/status', 'get', {target: 'serverStatus'});
+        }
+
+        // Update server status every 5 seconds
+        setInterval(updateServerStatus, 5000);
+
+        // Initial load
+        window.onload = updateServerStatus;
+    </script>
+</body>
+</html>
